@@ -32,7 +32,7 @@ Every person pairs their own Foodisco account — add the integration once per p
 [![Import vacuum blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Faesthetiker%2Ffoodisco-home-assistant%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Ffoodisco%2Fvacuum_after_meal.yaml)
 [![Import oven blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Faesthetiker%2Ffoodisco-home-assistant%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Ffoodisco%2Foven_finished.yaml)
 
-- **Vacuum after meals** — pick the Foodisco event entity, a "kitchen occupied" binary sensor, your vacuum
+- **Vacuum after meals** — pick the Foodisco event entity (or several, one per person — they share the cooldown), a "kitchen occupied" binary sensor, your vacuum
   and the button that starts its after-meal programme.
 - **Oven finished** — pick the oven's state sensor (e.g. Home Connect operation state), the value that means
   "finished", and the Foodisco account to tell.

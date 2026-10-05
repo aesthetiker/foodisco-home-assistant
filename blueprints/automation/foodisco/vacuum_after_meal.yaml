@@ -9,11 +9,14 @@ blueprint:
   input:
     meal_event:
       name: Foodisco "Mahlzeit geloggt"
-      description: Die Ereignis-Entität der Person, deren Mahlzeiten den Sauger auslösen.
+      description: >
+        Die Ereignis-Entität(en) der Personen, deren Mahlzeiten den Sauger auslösen. Mehrere Personen
+        in einer Automation teilen sich die Sperre zwischen zwei Läufen — eine geteilte Mahlzeit startet den Sauger nur einmal.
       selector:
         entity:
           domain: event
           integration: foodisco
+          multiple: true
     kitchen_occupied:
       name: Küche belegt
       description: Ein Sensor, der "on" ist, solange jemand in der Küche ist (z. B. aus Bermuda).
