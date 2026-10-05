@@ -1,0 +1,104 @@
+blueprint:
+  name: Foodisco – Küche saugen nach dem Essen (ohne Integration, REST-Sensoren)
+  description: >
+    Sobald du in Foodisco ein Mittag- oder Abendessen loggst und niemand mehr in
+    der Küche war, startet dein Saugroboter das Programm "nach Mahlzeiten".
+    Braucht die Sensoren aus der Foodisco-Einrichtung (Profil → Integrationen →
+    Home Assistant).
+  domain: automation
+  input:
+    last_meal:
+      name: Sensor "Foodisco last meal"
+      description: Der Sensor mit dem Zeitpunkt der letzten Mahlzeit (Attribut "type").
+      default: sensor.foodisco_last_meal
+      selector:
+        entity:
+          domain: sensor
+    kitchen_occupied:
+      name: Küche belegt
+      description: Ein Sensor, der "on" ist, solange jemand in der Küche ist (z. B. aus Bermuda).
+      selector:
+        entity:
+          domain: binary_sensor
+    vacuum:
+      name: Saugroboter
+      selector:
+        entity:
+          domain: vacuum
+    run_button:
+      name: Knopf "nach Mahlzeiten"
+      description: Der Knopf, der das Küchenprogramm startet.
+      selector:
+        entity:
+          domain: button
+    quiet_minutes:
+      name: Küche so lange leer (Minuten)
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 60
+          unit_of_measurement: min
+    cooldown_minutes:
+      name: Mindestabstand zwischen zwei Läufen (Minuten)
+      description: Eine geteilte Mahlzeit wird oft mehrfach geloggt — das verhindert Doppelläufe.
+      default: 90
+      selector:
+        number:
+          min: 10
+          max: 480
+          unit_of_measurement: min
+    start_time:
+      name: Frühestens um
+      default: "07:00:00"
+      selector:
+        time:
+    end_time:
+      name: Spätestens um
+      default: "21:30:00"
+      selector:
+        time:
+
+mode: single
+
+variables:
+  last_meal: !input last_meal
+  kitchen_occupied: !input kitchen_occupied
+  vacuum: !input vacuum
+  quiet_seconds: !input quiet_minutes
+  cooldown_seconds: !input cooldown_minutes
+
+trigger:
+  - platform: state
+    entity_id: !input last_meal
+    # Nach jedem Neustart springen die Sensoren von "unavailable" auf ihren ersten Wert —
+    # das ist keine neue Mahlzeit.
+    not_from:
+      - unavailable
+      - unknown
+    not_to:
+      - unavailable
+      - unknown
+
+condition:
+  - condition: template
+    value_template: "{{ state_attr(last_meal, 'type') in ['lunch', 'dinner'] }}"
+  - condition: time
+    after: !input start_time
+    before: !input end_time
+  - condition: template
+    value_template: >
+      {{ this.attributes.last_triggered is none
+         or (now() - this.attributes.last_triggered).total_seconds() > (cooldown_seconds | int) * 60 }}
+
+action:
+  - wait_template: >
+      {{ is_state(kitchen_occupied, 'off')
+         and (now() - states[kitchen_occupied].last_changed).total_seconds() >= (quiet_seconds | int) * 60 }}
+    timeout: "02:00:00"
+    continue_on_timeout: false
+  - condition: template
+    value_template: "{{ is_state(vacuum, 'docked') }}"
+  - service: button.press
+    target:
+      entity_id: !input run_button

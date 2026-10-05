@@ -1,0 +1,44 @@
+blueprint:
+  name: Foodisco – Backofen fertig melden
+  description: >
+    Sagt Foodisco, dass der Backofen fertig ist. Foodisco entscheidet dann selbst,
+    ob es nachfragt, was du gekocht hast (frühestens nach 20 Minuten, nur zur
+    Essenszeit, nur wenn nichts geloggt wurde, höchstens einmal je Mahlzeit).
+    Foodisco bekommt nur "Backofen fertig" und die Uhrzeit.
+    Braucht die Foodisco-Integration.
+  domain: automation
+  input:
+    oven_state:
+      name: Backofen-Zustand
+      description: Der Sensor, der "finished" meldet, wenn der Backofen fertig ist (z. B. Home Connect "Betriebszustand").
+      selector:
+        entity:
+          domain: sensor
+    finished_state:
+      name: Wert für "fertig"
+      default: finished
+      selector:
+        text:
+    account:
+      name: Foodisco-Konto
+      description: Wem die Nachfrage gilt. Bei mehreren verbundenen Personen eines wählen.
+      selector:
+        config_entry:
+          integration: foodisco
+
+mode: single
+
+trigger:
+  - platform: state
+    entity_id: !input oven_state
+    to: !input finished_state
+    # Ein Neuladen ist kein fertiger Backofen.
+    not_from:
+      - unavailable
+      - unknown
+
+action:
+  - service: foodisco.report_event
+    data:
+      event: oven_finished
+      config_entry_id: !input account

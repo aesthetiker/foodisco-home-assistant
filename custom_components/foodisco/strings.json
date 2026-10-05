@@ -1,0 +1,110 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Foodisco",
+        "description": "Open Foodisco → Profile → Integrations → Home Assistant and create a pairing code. Enter it here. The code works for 10 minutes and only once.",
+        "data": {
+          "code": "Pairing code"
+        },
+        "data_description": {
+          "code": "For example ABCD-EFGH"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Connect Foodisco again",
+        "description": "The access was revoked or is no longer valid. Create a new pairing code in the Foodisco app and enter it here.",
+        "data": {
+          "code": "Pairing code"
+        }
+      }
+    },
+    "error": {
+      "invalid_code": "This code is wrong, expired or already used. Create a new one in the app.",
+      "cannot_connect": "Foodisco could not be reached. Check the internet connection and try again.",
+      "unknown": "Something unexpected went wrong."
+    },
+    "abort": {
+      "already_configured": "This Foodisco account is already connected. The access was refreshed.",
+      "reauth_successful": "Connected again.",
+      "wrong_account": "This code belongs to a different Foodisco account."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "kcal_remaining": {
+        "name": "Calories remaining"
+      },
+      "kcal_today": {
+        "name": "Calories today"
+      },
+      "protein_today": {
+        "name": "Protein today"
+      },
+      "water_today": {
+        "name": "Water today"
+      },
+      "last_meal": {
+        "name": "Last meal"
+      },
+      "planned_dinner": {
+        "name": "Planned dinner"
+      }
+    },
+    "event": {
+      "meal_logged": {
+        "name": "Meal logged",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "breakfast": "Breakfast",
+              "lunch": "Lunch",
+              "dinner": "Dinner",
+              "snack": "Snack"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "report_event": {
+      "name": "Report event",
+      "description": "Tell Foodisco that something happened at home, for example that the oven is done. Foodisco then decides whether to ask what you cooked.",
+      "fields": {
+        "event": {
+          "name": "Event",
+          "description": "What happened."
+        },
+        "config_entry_id": {
+          "name": "Account",
+          "description": "Which Foodisco account to tell. Only needed when several people are connected."
+        }
+      }
+    }
+  },
+  "selector": {
+    "event": {
+      "options": {
+        "oven_finished": "Oven finished"
+      }
+    }
+  },
+  "exceptions": {
+    "no_account": {
+      "message": "No connected Foodisco account found."
+    },
+    "choose_account": {
+      "message": "Several Foodisco accounts are connected — choose one."
+    },
+    "reauth_needed": {
+      "message": "The Foodisco access is no longer valid. Connect again in Settings → Devices & services."
+    },
+    "rate_limited": {
+      "message": "Foodisco asked to slow down. Try again in a moment."
+    },
+    "cannot_connect": {
+      "message": "Foodisco could not be reached."
+    }
+  }
+}

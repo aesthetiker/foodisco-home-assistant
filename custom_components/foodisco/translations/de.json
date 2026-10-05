@@ -1,0 +1,110 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Foodisco verbinden",
+        "description": "Öffne Foodisco → Profil → Integrationen → Home Assistant und erzeuge einen Kopplungscode. Gib ihn hier ein. Der Code gilt 10 Minuten und nur einmal.",
+        "data": {
+          "code": "Kopplungscode"
+        },
+        "data_description": {
+          "code": "Zum Beispiel ABCD-EFGH"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Foodisco erneut verbinden",
+        "description": "Der Zugang wurde widerrufen oder ist nicht mehr gültig. Erzeuge in der Foodisco-App einen neuen Kopplungscode und gib ihn hier ein.",
+        "data": {
+          "code": "Kopplungscode"
+        }
+      }
+    },
+    "error": {
+      "invalid_code": "Der Code ist falsch, abgelaufen oder schon benutzt. Erzeuge in der App einen neuen.",
+      "cannot_connect": "Foodisco ist nicht erreichbar. Prüfe die Internetverbindung und versuche es erneut.",
+      "unknown": "Etwas Unerwartetes ist schiefgegangen."
+    },
+    "abort": {
+      "already_configured": "Dieses Foodisco-Konto ist schon verbunden. Der Zugang wurde erneuert.",
+      "reauth_successful": "Wieder verbunden.",
+      "wrong_account": "Dieser Code gehört zu einem anderen Foodisco-Konto."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "kcal_remaining": {
+        "name": "Kalorien übrig"
+      },
+      "kcal_today": {
+        "name": "Kalorien heute"
+      },
+      "protein_today": {
+        "name": "Protein heute"
+      },
+      "water_today": {
+        "name": "Wasser heute"
+      },
+      "last_meal": {
+        "name": "Letzte Mahlzeit"
+      },
+      "planned_dinner": {
+        "name": "Geplantes Abendessen"
+      }
+    },
+    "event": {
+      "meal_logged": {
+        "name": "Mahlzeit geloggt",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "breakfast": "Frühstück",
+              "lunch": "Mittagessen",
+              "dinner": "Abendessen",
+              "snack": "Snack"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "report_event": {
+      "name": "Ereignis melden",
+      "description": "Sagt Foodisco, dass zu Hause etwas passiert ist, zum Beispiel dass der Backofen fertig ist. Foodisco entscheidet dann, ob es nachfragt, was du gekocht hast.",
+      "fields": {
+        "event": {
+          "name": "Ereignis",
+          "description": "Was passiert ist."
+        },
+        "config_entry_id": {
+          "name": "Konto",
+          "description": "Welchem Foodisco-Konto es gemeldet wird. Nur nötig, wenn mehrere Personen verbunden sind."
+        }
+      }
+    }
+  },
+  "selector": {
+    "event": {
+      "options": {
+        "oven_finished": "Backofen fertig"
+      }
+    }
+  },
+  "exceptions": {
+    "no_account": {
+      "message": "Kein verbundenes Foodisco-Konto gefunden."
+    },
+    "choose_account": {
+      "message": "Mehrere Foodisco-Konten sind verbunden — wähle eines."
+    },
+    "reauth_needed": {
+      "message": "Der Foodisco-Zugang ist nicht mehr gültig. Verbinde ihn neu unter Einstellungen → Geräte & Dienste."
+    },
+    "rate_limited": {
+      "message": "Foodisco bittet, langsamer zu sein. Versuche es gleich noch einmal."
+    },
+    "cannot_connect": {
+      "message": "Foodisco ist nicht erreichbar."
+    }
+  }
+}

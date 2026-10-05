@@ -1,0 +1,15 @@
+report_event:
+  fields:
+    event:
+      required: true
+      example: oven_finished
+      selector:
+        select:
+          options:
+            - oven_finished
+          translation_key: event
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: foodisco

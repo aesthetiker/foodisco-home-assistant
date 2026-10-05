@@ -1,0 +1,106 @@
+blueprint:
+  name: Foodisco – Küche saugen nach dem Essen
+  description: >
+    Sobald du in Foodisco ein Mittag- oder Abendessen loggst und niemand mehr in
+    der Küche war, startet dein Saugroboter das Programm "nach Mahlzeiten".
+    Braucht die Foodisco-Integration (Einstellungen → Geräte & Dienste → Foodisco).
+    Ein Neustart von Home Assistant löst nichts aus.
+  domain: automation
+  input:
+    meal_event:
+      name: Foodisco "Mahlzeit geloggt"
+      description: Die Ereignis-Entität der Person, deren Mahlzeiten den Sauger auslösen.
+      selector:
+        entity:
+          domain: event
+          integration: foodisco
+    kitchen_occupied:
+      name: Küche belegt
+      description: Ein Sensor, der "on" ist, solange jemand in der Küche ist (z. B. aus Bermuda).
+      selector:
+        entity:
+          domain: binary_sensor
+    vacuum:
+      name: Saugroboter
+      selector:
+        entity:
+          domain: vacuum
+    run_button:
+      name: Knopf "nach Mahlzeiten"
+      description: Der Knopf, der das Küchenprogramm startet.
+      selector:
+        entity:
+          domain: button
+    quiet_minutes:
+      name: Küche so lange leer (Minuten)
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 60
+          unit_of_measurement: min
+    cooldown_minutes:
+      name: Mindestabstand zwischen zwei Läufen (Minuten)
+      description: Eine geteilte Mahlzeit wird oft mehrfach geloggt — das verhindert Doppelläufe.
+      default: 90
+      selector:
+        number:
+          min: 10
+          max: 480
+          unit_of_measurement: min
+    start_time:
+      name: Frühestens um
+      default: "07:00:00"
+      selector:
+        time:
+    end_time:
+      name: Spätestens um
+      default: "21:30:00"
+      selector:
+        time:
+
+mode: single
+
+variables:
+  kitchen_occupied: !input kitchen_occupied
+  vacuum: !input vacuum
+  quiet_seconds: !input quiet_minutes
+  cooldown_seconds: !input cooldown_minutes
+
+trigger:
+  - platform: state
+    entity_id: !input meal_event
+    # Nach einem Neustart stellt Home Assistant den letzten Zustand wieder her ("unavailable" → alter Zeitstempel).
+    # Das ist kein Essen; die Bedingung unten prüft zusätzlich, dass das Ereignis gerade eben war.
+    not_from:
+      - unavailable
+    not_to:
+      - unavailable
+      - unknown
+
+condition:
+  - condition: template
+    value_template: >
+      {% set s = trigger.to_state %}
+      {{ s is not none
+         and s.attributes.event_type in ['lunch', 'dinner']
+         and (now() - as_datetime(s.state)).total_seconds() < 300 }}
+  - condition: time
+    after: !input start_time
+    before: !input end_time
+  - condition: template
+    value_template: >
+      {{ this.attributes.last_triggered is none
+         or (now() - this.attributes.last_triggered).total_seconds() > (cooldown_seconds | int) * 60 }}
+
+action:
+  - wait_template: >
+      {{ is_state(kitchen_occupied, 'off')
+         and (now() - states[kitchen_occupied].last_changed).total_seconds() >= (quiet_seconds | int) * 60 }}
+    timeout: "02:00:00"
+    continue_on_timeout: false
+  - condition: template
+    value_template: "{{ is_state(vacuum, 'docked') }}"
+  - service: button.press
+    target:
+      entity_id: !input run_button
